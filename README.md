@@ -4,7 +4,7 @@ A CSUF-exclusive buy/sell marketplace built with Next.js 14, TypeScript, Tailwin
 
 ## Features
 
-- **CSUF Email Verification**: Only @csu.fullerton.edu emails are allowed
+- **Google Email Verification**: Only google emails are allowed
 - **User Authentication**: Secure sign-up and sign-in with Firebase Auth
 - **Listings Management**: Create, browse, and search listings with photos
 - **In-App Messaging**: Direct communication between buyers and sellers
