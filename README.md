@@ -1,211 +1,191 @@
 # Titan Marketplace
 
-A CSUF-exclusive buy/sell marketplace built with Next.js 14, TypeScript, Tailwind CSS, and Firebase.
+A clean, polished marketplace for buying and selling on campus. Built with Next.js 15, React 19, TypeScript, and Firebase.
 
-## Features
+## What It Does
 
-- **Google Email Verification**: Only google emails are allowed
-- **User Authentication**: Secure sign-up and sign-in with Firebase Auth
-- **Listings Management**: Create, browse, and search listings with photos
-- **In-App Messaging**: Direct communication between buyers and sellers
-- **Moderation Tools**: Report listings and users, admin controls
-- **Responsive Design**: Mobile-first design with Tailwind CSS
+Think of it like a campus-specific Craigslist, but way nicer. Students can list items for sale, browse what others are selling, and message each other directly—all with a smooth, modern interface.
+
+**Key Features:**
+- Sign in with Google (no passwords to remember)
+- Create listings with photos (up to 5 images per listing)
+- Browse everything without signing in
+- Real-time messaging between buyers and sellers
+- View other users' profiles to see what else they're selling
+- Report anything sketchy
+- Works great on mobile and desktop
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
-- **Backend**: Firebase (Auth, Firestore, Storage)
-- **Deployment**: Vercel (recommended)
+**Frontend:**
+- Next.js 15 with App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Framer Motion for smooth animations
+- shadcn/ui components
+
+**Backend:**
+- Firebase Authentication (Google Sign-In)
+- Firestore for data
+- Firebase Storage for images
 
 ## Getting Started
 
-### Prerequisites
+### What You'll Need
 
-- Node.js 18+ 
-- npm or yarn
-- Firebase project
+- Node.js 18 or higher
+- A Firebase project (free tier works fine)
+- About 10 minutes
 
-### Installation
+### Setup Steps
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd titan-marketplace
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Set up Firebase:
-   - Create a new Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
-   - Enable Authentication (Email/Password)
-   - Create a Firestore database
+1. **Clone the repo:**
+git clone <your-repo-url>
+cd titan-marketplace2. **Install dependencies:**
+npm install3. **Set up Firebase:**
+   - Head to [Firebase Console](https://console.firebase.google.com)
+   - Create a new project
+   - Enable Google Sign-In in Authentication
+   - Create a Firestore database (start in test mode, we'll add rules next)
    - Enable Storage
-   - Get your Firebase config
+   - Grab your config from Project Settings → General → Your apps
 
-4. Configure environment variables:
-   - Copy `env.template` to `.env.local`
-   - Fill in your Firebase configuration:
-
-```env
+4. **Create `.env.local` in the root:**
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.firebasestorage.app
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-```
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id5. **Run it:**
+npm run devOpen [http://localhost:3000](http://localhost:3000) and you're good to go!
 
-5. Run the development server:
-```bash
-npm run dev
-```
+## How It's Organized
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Install dependencies:
 
-## Project Structure
+npm install
+- `/` - Homepage
+- `/browse-listings` - See all listings (anyone can view)
+- `/sell-item/create-listing` - Post something new
+- `/sell-item/view-listing/[id]` - View a specific listing
+- `/chat` - Your messages
+- `/profile` - Your profile and listings
+- `/profile/[userId]` - Someone else's profile
+- `/login` - Sign in
 
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── explore/           # Browse listings
-│   ├── listings/          # Listing pages
-│   │   ├── new/          # Create new listing
-│   │   └── [id]/         # Listing detail page
-│   ├── login/            # Authentication page
-│   ├── messages/         # In-app messaging
-│   ├── profile/          # User profile
-│   └── layout.tsx        # Root layout
-├── components/            # React components
-│   └── Layout/           # Layout components
-├── contexts/             # React contexts
-│   └── AuthContext.tsx   # Authentication context
-├── lib/                  # Utility libraries
-│   └── firebase.ts       # Firebase configuration
-└── types/                # TypeScript type definitions
-    └── index.ts          # App types
-```
-
-## Available Routes
-
-- `/` - Home page with hero section and features
-- `/login` - Sign in/Sign up page
-- `/explore` - Browse and search listings
-- `/listings/new` - Create new listing (requires auth)
-- `/listings/[id]` - View listing details and message seller
-- `/messages` - In-app messaging (requires auth)
-- `/profile` - User profile and settings (requires auth)
-
-## Firebase Setup
+## Firebase Configuration
 
 ### Authentication
-1. Go to Authentication > Sign-in method
-2. Enable Email/Password provider
-3. Configure authorized domains
+Just enable Google Sign-In. That's it. No email/password setup needed.
 
-### Firestore Database
-1. Create a Firestore database
-2. Set up security rules (see below)
-3. Create collections: `users`, `listings`, `messages`, `reports`
+### Firestore Rules
 
-### Storage
-1. Enable Cloud Storage
-2. Configure security rules for image uploads
+Copy these into Firestore → Rules:
 
-### Security Rules
-
-**Firestore Rules:**
-```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read/write their own user document
+    // Anyone can read user profiles (needed to show seller info)
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+      allow create, update, delete: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Listings are readable by all authenticated users
+    // Anyone can browse listings, only sellers can create/edit
     match /listings/{listingId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && 
-        (request.auth.uid == resource.data.sellerId || 
-         request.auth.uid == request.resource.data.sellerId);
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.sellerId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.sellerId;
     }
     
-    // Messages are readable by participants
-    match /messages/{messageId} {
+    // Only conversation participants can read/write
+    match /conversations/{conversationId} {
       allow read, write: if request.auth != null && 
-        (request.auth.uid == resource.data.senderId || 
-         request.auth.uid == resource.data.receiverId);
+        request.auth.uid in resource.data.participants;
+      
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null && 
+          request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+      }
+    }
+    
+    // Reports: only the reporter and admins can read
+    match /reports/{reportId} {
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.reporterId || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.reporterId;
     }
   }
-}
-```
+}### Storage Rules
 
-**Storage Rules:**
-```javascript
+For Storage → Rules:
+ript
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Listing images: anyone can view, authenticated users can upload
     match /listings/{allPaths=**} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if request.auth != null;
     }
+    
+    // Profile photos: anyone can view, only owner can upload
+    match /profiles/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
   }
-}
-```
+}## How Things Work
+
+**First Time User:**
+1. Sign in with Google
+2. Get redirected to profile setup (name, major, grad year, bio, photo)
+3. Start browsing and listing
+
+**Creating a Listing:**
+- Fill out the form, upload up to 5 photos
+- Hit "Create Listing"
+- It shows up in browse immediately
+
+**Messaging:**
+- Click "Message Seller" on any listing
+- Conversation starts automatically
+- Messages update in real-time (no refresh needed)
+
+**Viewing Profiles:**
+- Click on a seller's name anywhere
+- See their profile and all their listings
+- Browse their other items
 
 ## Development
+h
+npm run dev    # Start dev server
+npm run build  # Build for production
+npm run start  # Run production build
+npm run lint   # Check for issues## Deploying
 
-### Available Scripts
+**Vercel (easiest):**
+1. Push to GitHub
+2. Import project in Vercel
+3. Add your `.env.local` variables
+4. Deploy
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-### Code Style
-
-- TypeScript for type safety
-- ESLint for code quality
-- Prettier for code formatting (recommended)
-- Tailwind CSS for styling
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
-
-### Other Platforms
-
-The app can be deployed to any platform that supports Next.js:
-- Netlify
-- AWS Amplify
-- Railway
-- DigitalOcean App Platform
+Works on any platform that supports Next.js (Netlify, Railway, etc.).
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+Found a bug? Want to add a feature? PRs welcome!
+
+1. Fork it
+2. Make your changes
+3. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Support
-
-For support, email [your-email@csu.fullerton.edu] or create an issue in the repository.
+MIT License - use it however you want.
 
 ---
 
-Built with ❤️ for the CSUF community
+Made for the CSUF community 🧡
