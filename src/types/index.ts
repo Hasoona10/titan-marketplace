@@ -3,47 +3,59 @@ export interface User {
   email: string;
   displayName: string;
   photoURL?: string;
+  major?: string;
+  gradYear?: number;
+  bio?: string;
   createdAt: Date;
+  updatedAt: Date;
   isAdmin?: boolean;
+  profileComplete?: boolean;
 }
 
 export interface Listing {
   id: string;
+  sellerId: string;
   title: string;
   description: string;
   price: number;
   category: string;
   condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
-  images: string[];
-  sellerId: string;
-  sellerName: string;
-  sellerEmail: string;
+  imageUrls: string[];
+  status: 'active' | 'sold';
   createdAt: Date;
   updatedAt: Date;
-  isActive: boolean;
-  isHidden: boolean;
   location?: string;
+}
+
+export interface Conversation {
+  id: string;
+  participants: string[];
+  listingId: string;
+  lastMessage?: string;
+  lastSenderId?: string;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
 export interface Message {
   id: string;
-  listingId: string;
+  conversationId: string;
   senderId: string;
-  receiverId: string;
-  content: string;
+  text: string;
   createdAt: Date;
-  isRead: boolean;
+  readBy: string[];
 }
 
 export interface Report {
   id: string;
-  type: 'listing' | 'user';
-  targetId: string;
   reporterId: string;
+  targetUserId?: string;
+  listingId?: string;
+  messageId?: string;
   reason: string;
-  description: string;
+  details: string;
+  status: 'open' | 'review' | 'resolved';
   createdAt: Date;
-  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
 }
 
 export type ListingCategory = 

@@ -3,133 +3,93 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { Chrome, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { signIn, signUp } = useAuth();
+  const { signInWithGoogle } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleSignIn = async () => {
     setError('');
     setLoading(true);
 
     try {
-      if (isSignUp) {
-        await signUp(email, password, displayName);
-      } else {
-        await signIn(email, password);
-      }
+      await signInWithGoogle();
       router.push('/');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-md mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-white via-csuf-blue/5 to-csuf-orange/5 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-md w-full"
+      >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {isSignUp ? 'Sign Up' : 'Login'}
+          <h1 className="text-4xl font-light text-gray-900 mb-2 tracking-tight">
+            Titan <span className="text-csuf-blue">Marketplace</span>
           </h1>
-          <p className="text-gray-600 mb-2">
-            {isSignUp ? 'Join Titan Marketplace' : 'Welcome back to Titan Marketplace'}
-          </p>
-          <p className="text-sm text-blue-600">
-            Only @csu.fullerton.edu emails allowed
+          <p className="text-gray-500 text-sm">
+            Sign in to continue
           </p>
         </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                required={isSignUp}
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-                placeholder="Full Name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
-            </div>
-          )}
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded"
-              placeholder="@csu.fullerton.edu"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
 
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 relative overflow-hidden">
+          {/* Subtle accent border */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-csuf-blue via-csuf-orange to-csuf-blue" />
+          
           {error && (
-            <div className="text-red-600 text-sm">{error}</div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4"
+            >
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            </motion.div>
           )}
 
           <button
-            type="submit"
+            onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded disabled:opacity-50"
+            className="w-full bg-white border-2 border-gray-300 text-gray-700 py-3.5 px-6 rounded-lg font-medium hover:bg-gray-50 hover:border-csuf-blue/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-sm hover:shadow"
           >
-            {loading ? 'Please wait...' : (isSignUp ? 'Sign Up' : 'Login')}
-          </button>
-        </form>
-
-        <div className="text-center mt-4">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSignUp(!isSignUp);
-              setError('');
-            }}
-            className="text-blue-600 text-sm"
-          >
-            {isSignUp 
-              ? 'Already have an account? Login' 
-              : "Don't have an account? Sign up"
-            }
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-csuf-blue border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <Chrome className="w-5 h-5" />
+                Continue with Google
+              </>
+            )}
           </button>
         </div>
-        
-        <div className="text-center mt-4">
-          <Link href="/" className="text-gray-600 text-sm">
+
+        <div className="mt-6 text-center">
+          <Link
+            href="/"
+            className="text-sm text-gray-500 hover:text-csuf-blue transition-colors"
+          >
             ← Back to home
           </Link>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

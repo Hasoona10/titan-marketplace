@@ -1,103 +1,25 @@
 @import "tailwindcss";
 
-body {
-  background: #f0f0f0;
-  color: #000000;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
-  margin: 0;
-  padding: 0;
+@theme {
+  --color-csuf-blue: #00274D;
+  --color-csuf-orange: #FF6A00;
 }
 
-h1 {
-  color: #003366;
-  font-size: 24px;
-  font-weight: bold;
-  margin: 10px 0;
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+  }
 }
 
-h2 {
-  color: #0066cc;
-  font-size: 18px;
-  font-weight: bold;
-  margin: 8px 0;
-}
-
-h3 {
-  color: #0066cc;
-  font-size: 14px;
-  font-weight: bold;
-  margin: 6px 0;
-}
-
-a {
-  color: #0066cc;
-  text-decoration: underline;
-}
-
-a:hover {
-  color: #cc0000;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  background: white;
-  border: 1px solid #cccccc;
-}
-
-td, th {
-  border: 1px solid #cccccc;
-  padding: 8px;
-  text-align: left;
-}
-
-th {
-  background: #e6e6e6;
-  font-weight: bold;
-}
-
-input, textarea, select {
-  border: 1px solid #999999;
-  padding: 4px;
-  font-size: 12px;
-}
-
-button {
-  background: #0066cc;
-  color: white;
-  border: 1px solid #003366;
-  padding: 6px 12px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #003366;
-}
-
-.container {
-  width: 800px;
-  margin: 0 auto;
-  background: white;
-  padding: 20px;
-  border: 1px solid #cccccc;
-}
-
-.navbar {
-  background: #e6e6e6;
-  border: 1px solid #cccccc;
-  padding: 10px;
-  margin-bottom: 20px;
-}
-
-.listing-item {
-  background: white;
-  border: 1px solid #cccccc;
-  margin: 5px 0;
-  padding: 10px;
-}
-
-.listing-item:hover {
-  background: #f9f9f9;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }
